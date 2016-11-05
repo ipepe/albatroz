@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'albatroz'.freeze
-  s.version = '0.0.4'
+  s.version = '0.0.5'
   s.date = '2016-11-05'
   s.authors = ['Patryk Ptasiński'.freeze]
   s.email = ['gemspec@ipepe.pl'.freeze]

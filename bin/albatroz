@@ -7,7 +7,7 @@ puts "Albatroz is starting watching and serving in #{Dir.pwd}"
 
 SOCKETS = []
 JS_RELOAD = <<-JS
-new WebSocket('ws://'+window.location.host+window.location.pathname).onmessage=function(){window.location=window.location}
+new WebSocket('ws://'+window.location.host).onmessage=function(){window.location=window.location}
 JS
 
 filewatcher = FileWatcher.new('**/*.*')
