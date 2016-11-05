@@ -3,9 +3,8 @@ require 'sinatra'
 require 'sinatra-websocket'
 require 'filewatcher'
 
-set :server, 'thin'
-set :views, '.'
-set :static, false
+puts "Albatroz is starting watching and serving in #{Dir.pwd}"
+
 SOCKETS = []
 JS_RELOAD = <<-JS
 new WebSocket('ws://'+window.location.host+window.location.pathname).onmessage=function(){window.location=window.location}
@@ -15,6 +14,10 @@ filewatcher = FileWatcher.new('**/*.*')
 thread = Thread.new(filewatcher){|fw| fw.watch{|f| puts "File changed: #{f}";EM.next_tick { ::SOCKETS.each{|s| s.send('reload') } }}}
 
 Sinatra.new do
+  set :app_file, Dir.pwd
+  set :server, 'thin'
+  set :views, Dir.pwd
+  set :static, false
   get '*' do |path|
     if request.websocket?
       request.websocket do |ws|
@@ -30,7 +33,7 @@ Sinatra.new do
     elsif path == '/'
       redirect '/index.html'
     elsif !request.websocket?
-      if File.exist?(File.join('.', path))
+      res = if File.exist?(File.join('.', path))
         send_file File.join('.', path)
       else
         case path.split('.').last
@@ -39,7 +42,12 @@ Sinatra.new do
           when 'js'
             coffee(path.split('.').first.to_sym)
         end
-      end.gsub('</head>',"<script>#{JS_RELOAD}</script></head>")
+      end
+      if res.respond_to?(:gsub)
+        res.gsub('</head>',"<script>#{JS_RELOAD}</script></head>")
+      else
+        res
+      end
     end
   end
 end.run!
